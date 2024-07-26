@@ -5,7 +5,6 @@
 - 😄 Pronouns: he/him
 - ⚡ Fun fact: I have long hair and im vegetarian lol
 - A very cool Discord Server: https://discord.com/invite/wDESTYeZy9
-<!---
-truelockmc/truelockmc is a ✨ special ✨ repository because its `README.md` (this file) appears on your GitHub profile.
-You can click the Preview link to take a look at your changes.
---->
+
+
+https://www.github-profile-summary-cards.vercel.app/api/cards/stats?username={truelockmc}&theme={github_dark}
