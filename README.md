@@ -7,4 +7,3 @@
 - A very cool Discord Server: https://discord.com/invite/wDESTYeZy9
 
 
-https://www.github-profile-summary-cards.vercel.app/api/cards/stats?username={truelockmc}&theme={github_dark}
