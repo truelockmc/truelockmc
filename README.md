@@ -3,7 +3,7 @@
 - 🌱 I’m currently learning Hacking
 - 📫 How to reach me anonyson@proton.me
 - 😄 Pronouns: he/him
-- ⚡ Fun fact: I have long hair and im vegetarian lol
+
 - A very cool Discord Server: https://discord.com/invite/wDESTYeZy9
 
 
