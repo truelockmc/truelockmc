@@ -7,6 +7,7 @@
 - A very cool Discord Server: https://discord.com/invite/wDESTYeZy9
 
 ![truelockmc's GitHub stats](https://github-readme-stats.vercel.app/api?username=truelockmc&show_icons=true&theme=dark)
+![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=truelockmc&size_weight=0.5&count_weight=0.5&theme=dark)
 
 
 
