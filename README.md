@@ -12,7 +12,9 @@
 ![](http://github-profile-summary-cards.vercel.app/api/cards/repos-per-language?username=truelockmc&theme=github_dark)
 
 ### 🔝 Top Contributed Repo
-![](https://most-popular-repos.vercel.app//api?username=truelockmc&limit=5&theme=dark&combine_all_yearly_contributions=true)
+
+<!--START_SECTION:contributions-->
+<!--END_SECTION:contributions-->
 
 ---
 
