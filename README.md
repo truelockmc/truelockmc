@@ -14,6 +14,13 @@
 ### 🔝 Top Contributed Repo
 
 <!--START_SECTION:contributions-->
+| Repo | Stars | Language | PRs merged |
+|------|------:|----------|:----------:|
+| [firstcontributions/first-contributions](https://github.com/firstcontributions/first-contributions) | ⭐ 53.1k | — | 2 |
+| [hak5/usbrubberducky-payloads](https://github.com/hak5/usbrubberducky-payloads) | ⭐ 5.6k | PowerShell | 1 |
+| [jksalcedo/librefind](https://github.com/jksalcedo/librefind) | ⭐ 483 | Kotlin | 1 |
+| [makalin/PlaySync](https://github.com/makalin/PlaySync) | ⭐ 15 | Python | 1 |
+| [BattlesOfBrass/BOB](https://github.com/BattlesOfBrass/BOB) | ⭐ 4 | Java | 3 |
 <!--END_SECTION:contributions-->
 
 ---
