@@ -4,11 +4,9 @@
 # 1. Place this file in your profile repo (github.com/truelockmc/truelockmc)
 #    at the path:  .github/workflows/contributions.yml
 #
-# 2. Add these two comment markers anywhere in your README.md where you want
-#    the table to appear, the workflow will write the content between them:
+# 2. Add this line anywhere in your README.md where you want the card to appear:
 #
-#      <!--START_SECTION:contributions-->
-#      <!--END_SECTION:contributions-->
+#      ![Contributions](contributions.svg)
 #
 # 3. First run: trigger the workflow manually via
 #    GitHub → Actions → "Update Contributions" → "Run workflow"
@@ -23,8 +21,8 @@ name: Update Contributions
 
 on:
   schedule:
-    - cron: "0 4 * * 1" 
-  workflow_dispatch:
+    - cron: "0 4 * * 1"   # every Monday 04:00 UTC
+  workflow_dispatch:        # also triggerable manually
 
 jobs:
   update:
@@ -32,78 +30,169 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Fetch & inject contributions
+      - name: Generate contributions SVG
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_USER: truelockmc
           MIN_STARS: 2
         run: |
           python3 - <<'EOF'
-          import os, json, urllib.request, re
+import os, json, urllib.request, urllib.parse
 
-          user  = os.environ["GH_USER"]
-          token = os.environ["GH_TOKEN"]
-          min_s = int(os.environ["MIN_STARS"])
+user  = os.environ["GH_USER"]
+token = os.environ["GH_TOKEN"]
+min_s = int(os.environ["MIN_STARS"])
 
-          def gh(url):
-              req = urllib.request.Request(url, headers={
-                  "Authorization": f"Bearer {token}",
-                  "Accept": "application/vnd.github+json",
-              })
-              with urllib.request.urlopen(req) as r:
-                  return json.loads(r.read())
+def gh(url):
+    req = urllib.request.Request(url, headers={
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json",
+    })
+    with urllib.request.urlopen(req) as r:
+        return json.loads(r.read())
 
-          # Alle gemergten PRs an fremden Repos
-          q  = f"type:pr author:{user} is:merged -user:{user}"
-          data = gh(f"https://api.github.com/search/issues?q={urllib.parse.quote(q)}&per_page=100&sort=updated")
+# Fetch all merged PRs by user on repos they don't own
+q    = f"type:pr author:{user} is:merged -user:{user}"
+data = gh(f"https://api.github.com/search/issues?q={urllib.parse.quote(q)}&per_page=100&sort=updated")
 
-          import urllib.parse
-          repo_map = {}
-          for item in data.get("items", []):
-              url = item["repository_url"]
-              repo_map[url] = repo_map.get(url, 0) + 1
+repo_map = {}
+for item in data.get("items", []):
+    url = item["repository_url"]
+    repo_map[url] = repo_map.get(url, 0) + 1
 
-          rows = []
-          for repo_url, pr_count in repo_map.items():
-              try:
-                  rd = gh(repo_url)
-              except Exception:
-                  continue
-              if rd.get("stargazers_count", 0) <= min_s:
-                  continue
-              rows.append((rd["stargazers_count"], pr_count, rd))
+rows = []
+for repo_url, pr_count in repo_map.items():
+    try:
+        rd = gh(repo_url)
+    except Exception:
+        continue
+    if rd.get("stargazers_count", 0) <= min_s:
+        continue
+    rows.append((rd["stargazers_count"], pr_count, rd))
 
-          rows.sort(reverse=True)
+rows.sort(reverse=True)
 
-          lines = ["| Repo | Stars | Language | PRs merged |",
-                   "|------|------:|----------|:----------:|"]
-          for stars, prs, rd in rows:
-              name  = rd["full_name"]
-              url   = rd["html_url"]
-              lang  = rd.get("language") or "—"
-              s_fmt = f"{stars/1000:.1f}k" if stars >= 1000 else str(stars)
-              lines.append(f"| [{name}]({url}) | ⭐ {s_fmt} | {lang} | {prs} |")
+# Language colors (GitHub standard)
+LANG_COLORS = {
+    "Python":     "#3572A5", "JavaScript": "#f1e05a", "TypeScript": "#2b7489",
+    "C":          "#555555", "C++":        "#f34b7d", "C#":         "#178600",
+    "Java":       "#b07219", "Go":         "#00ADD8", "Rust":       "#dea584",
+    "PHP":        "#4F5D95", "Ruby":       "#701516", "Shell":      "#89e051",
+    "HTML":       "#e34c26", "CSS":        "#563d7c", "Kotlin":     "#A97BFF",
+    "Swift":      "#ffac45", "Dart":       "#00B4AB", "Lua":        "#000080",
+    "Nix":        "#7e7eff", "PowerShell": "#012456",
+}
 
-          block = "\n".join(lines)
+def lang_color(lang):
+    return LANG_COLORS.get(lang, "#555555")
 
-          with open("README.md") as f:
-              content = f.read()
+def esc(s):
+    return (s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
 
-          content = re.sub(
-              r"<!--START_SECTION:contributions-->.*?<!--END_SECTION:contributions-->",
-              f"<!--START_SECTION:contributions-->\n{block}\n<!--END_SECTION:contributions-->",
-              content, flags=re.DOTALL
-          )
+def fmt_stars(n):
+    return f"{n/1000:.1f}k" if n >= 1000 else str(n)
 
-          with open("README.md", "w") as f:
-              f.write(content)
-          print("Done.")
-          EOF
+def trim(s, max_chars=55):
+    s = s or "No description."
+    return s[:max_chars - 1] + "…" if len(s) > max_chars else s
 
-      - name: Commit changes
+# Layout constants
+W         = 800
+PAD       = 24
+ROW_H     = 54
+ROW_GAP   = 6
+HEADER_H  = 70
+FOOTER_H  = 40
+AVATAR_R  = 13
+max_rows  = min(len(rows), 10)
+total_h   = HEADER_H + max_rows * (ROW_H + ROW_GAP) - ROW_GAP + FOOTER_H + PAD
+
+lines = []
+lines.append(f'<svg width="{W}" height="{total_h}" viewBox="0 0 {W} {total_h}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">')
+lines.append(f'<rect width="{W}" height="{total_h}" rx="12" fill="#0d0d0d"/>')
+
+# Header
+lines.append(f'<text x="{PAD}" y="52" font-family="\'SF Mono\',\'Fira Code\',monospace" font-size="20" font-weight="600" fill="#ffffff">CONTRIBUTIONS</text>')
+lines.append(f'<text x="175" y="52" font-family="\'SF Mono\',\'Fira Code\',monospace" font-size="20" font-weight="600" fill="#333"> · {esc(user)}</text>')
+lines.append(f'<line x1="{PAD}" y1="64" x2="{W - PAD}" y2="64" stroke="#1f1f1f" stroke-width="1"/>')
+
+# Rows
+for i, (stars, prs, rd) in enumerate(rows[:max_rows]):
+    y       = HEADER_H + i * (ROW_H + ROW_GAP)
+    bg      = "#161616" if i % 2 == 0 else "#111111"
+    owner   = esc(rd["owner"]["login"])
+    name    = esc(rd["name"])
+    desc    = esc(trim(rd.get("description") or ""))
+    lang    = rd.get("language") or ""
+    lcolor  = lang_color(lang)
+    star_s  = fmt_stars(stars)
+    pr_s    = f"{prs} PR{'s' if prs > 1 else ''}"
+    rank    = f"{i+1:02d}"
+    repo_url = esc(rd["html_url"])
+
+    cx = PAD + 16
+    cy = y + ROW_H // 2
+
+    lines.append(f'<a href="{repo_url}" target="_blank">')
+    lines.append(f'  <rect x="{PAD}" y="{y}" width="{W - 2*PAD}" height="{ROW_H}" rx="6" fill="{bg}"/>')
+
+    # Rank
+    lines.append(f'  <text x="{PAD + 8}" y="{cy + 4}" font-family="\'SF Mono\',\'Fira Code\',monospace" font-size="11" fill="#2a2a2a" text-anchor="middle">{rank}</text>')
+
+    # Avatar
+    lines.append(f'  <clipPath id="av{i}"><circle cx="{cx + 12}" cy="{cy}" r="{AVATAR_R}"/></clipPath>')
+    lines.append(f'  <circle cx="{cx + 12}" cy="{cy}" r="{AVATAR_R}" fill="#1e1e1e" stroke="#2a2a2a" stroke-width="1"/>')
+    lines.append(f'  <image href="{esc(rd["owner"]["avatar_url"])}&amp;s=64" x="{cx + 12 - AVATAR_R}" y="{cy - AVATAR_R}" width="{AVATAR_R*2}" height="{AVATAR_R*2}" clip-path="url(#av{i})"/>')
+
+    tx = cx + 12 + AVATAR_R + 10
+
+    # Owner / repo name
+    owner_w = len(owner) * 6.8 + 24
+    lines.append(f'  <text x="{tx}" y="{cy - 6}" font-family="\'SF Mono\',\'Fira Code\',monospace" font-size="11" fill="#555">{owner} /</text>')
+    lines.append(f'  <text x="{tx + owner_w}" y="{cy - 6}" font-family="\'SF Mono\',\'Fira Code\',monospace" font-size="11" font-weight="600" fill="#e8e8e8">{name}</text>')
+
+    # Description
+    lines.append(f'  <text x="{tx}" y="{cy + 11}" font-family="\'SF Mono\',\'Fira Code\',monospace" font-size="10" fill="#3a3a3a">{desc}</text>')
+
+    # Right meta
+    right_x = W - PAD - 16
+
+    # PR badge
+    badge_w = len(pr_s) * 7 + 26
+    bx = right_x - badge_w
+    lines.append(f'  <rect x="{bx}" y="{cy - 11}" width="{badge_w}" height="18" rx="4" fill="#0f1f0f"/>')
+    lines.append(f'  <text x="{bx + badge_w//2}" y="{cy + 2}" font-family="\'SF Mono\',\'Fira Code\',monospace" font-size="9" fill="#3d7a3d" text-anchor="middle">{pr_s} merged</text>')
+
+    # Language
+    if lang:
+        lang_x = bx - len(lang) * 6.5 - 22
+        lines.append(f'  <circle cx="{lang_x}" cy="{cy - 1}" r="5" fill="{lcolor}"/>')
+        lines.append(f'  <text x="{lang_x + 10}" y="{cy + 3}" font-family="\'SF Mono\',\'Fira Code\',monospace" font-size="10" fill="#444">{esc(lang)}</text>')
+        star_x = lang_x - 10
+    else:
+        star_x = bx - 10
+
+    # Stars
+    lines.append(f'  <text x="{star_x}" y="{cy + 3}" font-family="\'SF Mono\',\'Fira Code\',monospace" font-size="11" fill="#555" text-anchor="end">⭐ {star_s}</text>')
+    lines.append('</a>')
+
+# Footer
+fy = total_h - FOOTER_H + 14
+lines.append(f'<line x1="{PAD}" y1="{fy - 6}" x2="{W - PAD}" y2="{fy - 6}" stroke="#1a1a1a" stroke-width="1"/>')
+lines.append(f'<text x="{PAD}" y="{fy + 12}" font-family="\'SF Mono\',\'Fira Code\',monospace" font-size="9" fill="#2a2a2a">// repos with &gt; {min_s} stars · sorted by stars · auto-updated weekly</text>')
+lines.append(f'<text x="{W - PAD}" y="{fy + 12}" font-family="\'SF Mono\',\'Fira Code\',monospace" font-size="9" fill="#222" text-anchor="end">{esc(user)}.github.io</text>')
+lines.append('</svg>')
+
+with open("contributions.svg", "w") as f:
+    f.write("\n".join(lines))
+
+print(f"Generated contributions.svg with {max_rows} entries.")
+EOF
+
+      - name: Commit SVG
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add README.md
-          git diff --cached --quiet || git commit -m "chore: update contributions"
+          git add contributions.svg
+          git diff --cached --quiet || git commit -m "chore: update contributions card"
           git push
