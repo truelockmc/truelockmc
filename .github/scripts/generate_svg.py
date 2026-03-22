@@ -80,19 +80,11 @@ L.append(f'<svg width="{W}" height="{total_h}" viewBox="0 0 {W} {total_h}" '
 L.append(f'<rect width="{W}" height="{total_h}" fill="#080808"/>')
 
 # ── Header ───────────────────────────────────────────────────────────────────
-# "// CONTRIBUTIONS" in DM Mono small, then big Bebas Neue heading
-L.append(f'<text x="{PAD_X}" y="22" '
-         f'font-family="\'DM Mono\',monospace" font-size="10" fill="#5a5650" letter-spacing="1">'
-         f'// CONTRIBUTIONS</text>')
 L.append(f'<text x="{PAD_X}" y="50" '
          f'font-family="Impact,\'Arial Narrow\',sans-serif" font-size="26" font-weight="700" '
          f'fill="#ede8df" letter-spacing="2">'
          f'CONTRIBUTIONS</text>')
-# muted user tag
-tag_x = PAD_X + 26 * 14.5 + 10   # rough width of "CONTRIBUTIONS" at 26px Impact
-L.append(f'<text x="{tag_x}" y="50" '
-         f'font-family="\'DM Mono\',monospace" font-size="13" fill="#5a5650">'
-         f'· {esc(user)}</text>')
+
 
 # Divider
 L.append(f'<line x1="{PAD_X}" y1="{HEADER_H}" x2="{W-PAD_X}" y2="{HEADER_H}" '
