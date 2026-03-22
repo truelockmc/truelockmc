@@ -1,8 +1,6 @@
 <svg width="800" height="386" viewBox="0 0 800 386" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <rect width="800" height="386" fill="#080808"/>
-<text x="22" y="22" font-family="'DM Mono',monospace" font-size="10" fill="#5a5650" letter-spacing="1">// CONTRIBUTIONS</text>
 <text x="22" y="50" font-family="Impact,'Arial Narrow',sans-serif" font-size="26" font-weight="700" fill="#ede8df" letter-spacing="2">CONTRIBUTIONS</text>
-<text x="242" y="50" font-family="'DM Mono',monospace" font-size="13" fill="#5a5650"> · truelockmc</text>
 <line x1="22" y1="60" x2="778" y2="60" stroke="#222222" stroke-width="1"/>
 <a href="https://github.com/firstcontributions/first-contributions" target="_blank">
 <rect x="0" y="60" width="800" height="58" fill="#111111"/>
