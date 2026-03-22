@@ -27,8 +27,8 @@ data = gh(f"https://api.github.com/search/issues?q={urllib.parse.quote(q)}&per_p
 
 repo_map = {}
 for item in data.get("items", []):
-    url = item["repository_url"]
-    repo_map[url] = repo_map.get(url, 0) + 1
+    u = item["repository_url"]
+    repo_map[u] = repo_map.get(u, 0) + 1
 
 rows = []
 for repo_url, pr_count in repo_map.items():
@@ -43,7 +43,6 @@ for repo_url, pr_count in repo_map.items():
 rows.sort(reverse=True)
 rows = rows[:10]
 
-# Pre-fetch avatars as base64
 for _, _, rd in rows:
     rd["_avatar_b64"] = fetch_b64(rd["owner"]["avatar_url"] + "&s=64")
 
@@ -56,36 +55,53 @@ LANG_COLORS = {
     "PowerShell":"#012456",
 }
 
-def lang_color(lang): return LANG_COLORS.get(lang, "#555555")
+RANK_COLORS = ["#e8a020", "#aaaaaa", "#a07050"]
+
+def lang_color(lang): return LANG_COLORS.get(lang, "#5a5650")
 def esc(s): return (s or "").replace("&","&amp;").replace("<","&lt;").replace(">","&gt;").replace('"',"&quot;")
 def fmt_stars(n): return f"{n/1000:.1f}k" if n >= 1000 else str(n)
-def trim(s, m=58): s = s or "No description."; return s[:m-1]+"..." if len(s)>m else s
+def trim(s, m=60): s = s or "No description."; return s[:m-1]+"..." if len(s)>m else s
 
-W         = 800
-PAD       = 28
-ROW_H     = 58
-ROW_GAP   = 5
-HEADER_H  = 66
-FOOTER_H  = 44
-AVATAR_R  = 14
-max_rows  = len(rows)
-total_h   = HEADER_H + max_rows*(ROW_H+ROW_GAP) - ROW_GAP + FOOTER_H + 16
+# ── Layout ───────────────────────────────────────────────────────────────────
+W        = 800
+PAD_X    = 22          # horizontal outer padding (matches website 1.4rem)
+ROW_PX   = 22          # inner row horizontal padding (1.4rem)
+ROW_H    = 58          # row height (matches .contrib-item ≈ 58px)
+HEADER_H = 60
+FOOTER_H = 36
+n        = len(rows)
+total_h  = HEADER_H + n * ROW_H + FOOTER_H
 
 L = []
-L.append(f'<svg width="{W}" height="{total_h}" viewBox="0 0 {W} {total_h}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">')
-L.append(f'<rect width="{W}" height="{total_h}" rx="12" fill="#0d0d0d"/>')
+L.append(f'<svg width="{W}" height="{total_h}" viewBox="0 0 {W} {total_h}" '
+         f'xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">')
 
-# Header — big "CONTRIBUTIONS" left, "· user" muted right side
-L.append(f'<text x="{PAD}" y="42" font-family="\'SF Mono\',\'Fira Code\',monospace" font-size="22" font-weight="700" fill="#ffffff" letter-spacing="-0.5">CONTRIBUTIONS</text>')
-L.append(f'<text x="222" y="42" font-family="\'SF Mono\',\'Fira Code\',monospace" font-size="22" font-weight="400" fill="#333"> · {esc(user)}</text>')
-L.append(f'<line x1="{PAD}" y1="58" x2="{W-PAD}" y2="58" stroke="#1e1e1e" stroke-width="1"/>')
+# Background
+L.append(f'<rect width="{W}" height="{total_h}" fill="#080808"/>')
 
-for i,(stars,prs,rd) in enumerate(rows):
-    y        = HEADER_H + i*(ROW_H+ROW_GAP)
-    bg       = "#161616" if i%2==0 else "#111111"
-    cx       = PAD + 22
-    cy       = y + ROW_H//2
-    tx       = cx + AVATAR_R + 12
+# ── Header ───────────────────────────────────────────────────────────────────
+# "// CONTRIBUTIONS" in DM Mono small, then big Bebas Neue heading
+L.append(f'<text x="{PAD_X}" y="22" '
+         f'font-family="\'DM Mono\',monospace" font-size="10" fill="#5a5650" letter-spacing="1">'
+         f'// CONTRIBUTIONS</text>')
+L.append(f'<text x="{PAD_X}" y="50" '
+         f'font-family="Impact,\'Arial Narrow\',sans-serif" font-size="26" font-weight="700" '
+         f'fill="#ede8df" letter-spacing="2">'
+         f'CONTRIBUTIONS</text>')
+# muted user tag
+tag_x = PAD_X + 26 * 14.5 + 10   # rough width of "CONTRIBUTIONS" at 26px Impact
+L.append(f'<text x="{tag_x}" y="50" '
+         f'font-family="\'DM Mono\',monospace" font-size="13" fill="#5a5650">'
+         f'· {esc(user)}</text>')
+
+# Divider
+L.append(f'<line x1="{PAD_X}" y1="{HEADER_H}" x2="{W-PAD_X}" y2="{HEADER_H}" '
+         f'stroke="#222222" stroke-width="1"/>')
+
+# ── Rows ─────────────────────────────────────────────────────────────────────
+for i, (stars, prs, rd) in enumerate(rows):
+    y        = HEADER_H + i * ROW_H
+    is_last  = (i == n - 1)
     owner    = esc(rd["owner"]["login"])
     name     = esc(rd["name"])
     desc     = esc(trim(rd.get("description") or ""))
@@ -95,54 +111,99 @@ for i,(stars,prs,rd) in enumerate(rows):
     repo_url = esc(rd["html_url"])
     avatar   = rd.get("_avatar_b64", "")
 
+    # row background (surface)
     L.append(f'<a href="{repo_url}" target="_blank">')
-    L.append(f'  <rect x="{PAD}" y="{y+2}" width="{W-2*PAD}" height="{ROW_H-4}" rx="6" fill="{bg}"/>')
+    L.append(f'<rect x="0" y="{y}" width="{W}" height="{ROW_H}" fill="#111111"/>')
 
-    # Rank
-    L.append(f'  <text x="{PAD+11}" y="{cy+4}" font-family="\'SF Mono\',\'Fira Code\',monospace" font-size="10" fill="#2e2e2e" text-anchor="middle">{i+1:02d}</text>')
+    # bottom border (omit on last row)
+    if not is_last:
+        L.append(f'<line x1="{PAD_X}" y1="{y+ROW_H}" x2="{W-PAD_X}" y2="{y+ROW_H}" '
+                 f'stroke="#222222" stroke-width="1"/>')
 
-    # Avatar circle + embedded image
-    L.append(f'  <clipPath id="av{i}"><circle cx="{cx}" cy="{cy}" r="{AVATAR_R}"/></clipPath>')
-    L.append(f'  <circle cx="{cx}" cy="{cy}" r="{AVATAR_R}" fill="#222" stroke="#2a2a2a" stroke-width="1"/>')
+    cx = PAD_X
+    cy = y + ROW_H // 2
+
+    # ── Rank ─────────────────────────────────────────────────────────────────
+    rank_col = RANK_COLORS[i] if i < 3 else "#222222"
+    L.append(f'<text x="{cx+10}" y="{cy+5}" '
+             f'font-family="Impact,\'Arial Narrow\',sans-serif" font-size="15" '
+             f'fill="{rank_col}" text-anchor="middle">{i+1}</text>')
+
+    # ── Avatar (32×32, rx=6 like website) ────────────────────────────────────
+    av_x = cx + 26
+    av_y = cy - 16
+    L.append(f'<clipPath id="av{i}"><rect x="{av_x}" y="{av_y}" width="32" height="32" rx="6"/></clipPath>')
+    L.append(f'<rect x="{av_x}" y="{av_y}" width="32" height="32" rx="6" fill="#222222"/>')
     if avatar:
-        L.append(f'  <image href="{avatar}" x="{cx-AVATAR_R}" y="{cy-AVATAR_R}" width="{AVATAR_R*2}" height="{AVATAR_R*2}" clip-path="url(#av{i})"/>')
+        L.append(f'<image href="{avatar}" x="{av_x}" y="{av_y}" '
+                 f'width="32" height="32" clip-path="url(#av{i})"/>')
 
-    # Owner / repo name
-    owner_w = len(owner)*6.6 + 20
-    L.append(f'  <text x="{tx}" y="{cy-5}" font-family="\'SF Mono\',\'Fira Code\',monospace" font-size="11" fill="#4a4a4a">{owner} /</text>')
-    L.append(f'  <text x="{tx+owner_w}" y="{cy-5}" font-family="\'SF Mono\',\'Fira Code\',monospace" font-size="12" font-weight="700" fill="#e0e0e0">{name}</text>')
+    # ── Text block ───────────────────────────────────────────────────────────
+    tx = av_x + 32 + 14
+    owner_w = len(owner) * 6.4 + 14
 
-    # Description
-    L.append(f'  <text x="{tx}" y="{cy+12}" font-family="\'SF Mono\',\'Fira Code\',monospace" font-size="10" fill="#363636">{desc}</text>')
+    # owner (muted) / repo (text color)
+    L.append(f'<text x="{tx}" y="{cy-4}" '
+             f'font-family="\'DM Mono\',monospace" font-size="11" fill="#5a5650">'
+             f'{owner} /</text>')
+    L.append(f'<text x="{tx + owner_w}" y="{cy-4}" '
+             f'font-family="\'DM Mono\',monospace" font-size="11" fill="#ede8df">'
+             f'{name}</text>')
 
-    # Right side meta
-    right = W - PAD - 16
+    # description
+    L.append(f'<text x="{tx}" y="{cy+12}" '
+             f'font-family="\'DM Mono\',monospace" font-size="10" fill="#5a5650">'
+             f'{desc}</text>')
 
-    # PR badge
-    badge_w = len(pr_s)*6.5 + 18
-    bx = right - badge_w
-    L.append(f'  <rect x="{bx}" y="{cy-10}" width="{badge_w}" height="17" rx="4" fill="#0d1f0d"/>')
-    L.append(f'  <text x="{bx+badge_w/2:.0f}" y="{cy+2}" font-family="\'SF Mono\',\'Fira Code\',monospace" font-size="9" fill="#3a7a3a" text-anchor="middle">{pr_s}</text>')
+    # ── Right side ────────────────────────────────────────────────────────────
+    rx_edge = W - PAD_X
 
-    # Language dot + name
+    # PR badge — amber pill like website
+    pr_w = len(pr_s) * 6.2 + 20
+    pr_x = rx_edge - pr_w
+    L.append(f'<rect x="{pr_x}" y="{cy-10}" width="{pr_w}" height="17" rx="8" '
+             f'fill="rgba(232,160,32,0.07)" stroke="rgba(232,160,32,0.3)" stroke-width="1"/>')
+    L.append(f'<text x="{pr_x + pr_w/2:.0f}" y="{cy+3}" '
+             f'font-family="\'DM Mono\',monospace" font-size="9" letter-spacing="1" '
+             f'fill="#e8a020" text-anchor="middle">{pr_s}</text>')
+
+    # language dot + name
     if lang:
-        lang_x = bx - len(lang)*6.5 - 20
-        L.append(f'  <circle cx="{lang_x}" cy="{cy}" r="5" fill="{lang_color(lang)}"/>')
-        L.append(f'  <text x="{lang_x+10}" y="{cy+4}" font-family="\'SF Mono\',\'Fira Code\',monospace" font-size="10" fill="#3e3e3e">{esc(lang)}</text>')
-        star_x = lang_x - 12
+        lang_w  = len(lang) * 6.4 + 14
+        lang_x  = pr_x - lang_w - 18
+        L.append(f'<circle cx="{lang_x}" cy="{cy}" r="5" fill="{lang_color(lang)}"/>')
+        L.append(f'<text x="{lang_x+10}" y="{cy+4}" '
+                 f'font-family="\'DM Mono\',monospace" font-size="10" fill="#5a5650">'
+                 f'{esc(lang)}</text>')
+        star_x = lang_x - 14
     else:
-        star_x = bx - 12
+        star_x = pr_x - 14
 
-    # Stars (star unicode U+2605 = ★, safe in SVG)
-    L.append(f'  <text x="{star_x}" y="{cy+4}" font-family="\'SF Mono\',\'Fira Code\',monospace" font-size="11" fill="#666" text-anchor="end">&#9733; {star_s}</text>')
+    # stars — star SVG path inline + muted text
+    L.append(f'<text x="{star_x}" y="{cy+4}" '
+             f'font-family="\'DM Mono\',monospace" font-size="11" fill="#5a5650" text-anchor="end">'
+             f'&#9733; {star_s}</text>')
+
+    # arrow hint
+    L.append(f'<text x="{W-8}" y="{cy+4}" '
+             f'font-family="\'DM Mono\',monospace" font-size="11" fill="#222222" text-anchor="end">'
+             f'&#8594;</text>')
+
     L.append('</a>')
 
-# Footer
-fy = total_h - FOOTER_H + 18
-L.append(f'<line x1="{PAD}" y1="{fy-8}" x2="{W-PAD}" y2="{fy-8}" stroke="#181818" stroke-width="1"/>')
-L.append(f'<text x="{PAD}" y="{fy+10}" font-family="\'SF Mono\',\'Fira Code\',monospace" font-size="9" fill="#282828">// repos with more than {min_s} stars · sorted by stars · auto-updated weekly</text>')
-L.append(f'<text x="{W-PAD}" y="{fy+10}" font-family="\'SF Mono\',\'Fira Code\',monospace" font-size="9" fill="#222" text-anchor="end">{esc(user)}.github.io</text>')
+# ── Footer ────────────────────────────────────────────────────────────────────
+fy = total_h - FOOTER_H + 6
+L.append(f'<line x1="{PAD_X}" y1="{fy}" x2="{W-PAD_X}" y2="{fy}" stroke="#1a1a1a" stroke-width="1"/>')
+L.append(f'<text x="{PAD_X}" y="{fy+18}" '
+         f'font-family="\'DM Mono\',monospace" font-size="9" fill="#2e2e2e">'
+         f'// repos with more than {min_s} stars · sorted by stars · auto-updated weekly</text>')
+L.append(f'<text x="{W-PAD_X}" y="{fy+18}" '
+         f'font-family="\'DM Mono\',monospace" font-size="9" fill="#2e2e2e" text-anchor="end">'
+         f'{esc(user)}.github.io</text>')
+
 L.append('</svg>')
 
-with open("contributions.svg","w") as f: f.write("\n".join(L))
-print(f"Done: {max_rows} entries.")
+with open("contributions.svg", "w") as f:
+    f.write("\n".join(L))
+
+print(f"Done: {len(rows)} entries.")
