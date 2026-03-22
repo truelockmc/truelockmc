@@ -78,9 +78,7 @@ L.append(f'<svg width="{W}" height="{total_h}" viewBox="0 0 {W} {total_h}" '
 L.append(f'<rect width="{W}" height="{total_h}" fill="#080808"/>')
 
 # Header
-L.append(f'<text x="{PAD_X}" y="22" font-family="\'DM Mono\',monospace" font-size="10" fill="#5a5650" letter-spacing="1">// CONTRIBUTIONS</text>')
 L.append(f'<text x="{PAD_X}" y="50" font-family="Impact,\'Arial Narrow\',sans-serif" font-size="26" font-weight="700" fill="#ede8df" letter-spacing="2">CONTRIBUTIONS</text>')
-L.append(f'<text x="242" y="50" font-family="\'DM Mono\',monospace" font-size="13" fill="#5a5650"> · {esc(user)}</text>')
 L.append(f'<line x1="{PAD_X}" y1="{HEADER_H}" x2="{W-PAD_X}" y2="{HEADER_H}" stroke="#222222" stroke-width="1"/>')
 
 # Rows
