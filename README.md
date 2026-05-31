@@ -1,5 +1,5 @@
 # 💫 About Me:
-👋 Hi, I’m @truelockmc<br><br>    👀 I’m interested in Cyber Security, Nature, Photography<br><br>    🌱 I’m currently learning Homelab stuff<br><br>    📫 How to reach me: anonyson@proton.me<br><br>    😄 Pronouns: he/him<br><br>   💬 A very cool Discord Server: https://discord.com/invite/wDESTYeZy9<br> <br> 📟 My github.io Website: https://truelockmc.github.io <br>
+👋 Hi, I’m @truelockmc<br><br>    👀 I’m interested in Cyber Security, Nature, Photography<br><br>    🌱 I’m currently learning Homelab stuff<br><br>    📫 How to reach me: anonyson@proton.me<br><br>    😄 Pronouns: he/him<br><br>   💬 A very cool Discord Server: https://discord.com/invite/wDESTYeZy9<br> <br> 📟 My website/portfolio: https://truelockmc.github.io / https://truelockmc.codeberg.page <br>
 
 
 ## 🌐 Socials:
