@@ -12,7 +12,7 @@
 <text x="94" y="85" font-family="'DM Mono',monospace" font-size="11" fill="#5a5650">firstcontributions /</text>
 <text x="223.2" y="85" font-family="'DM Mono',monospace" font-size="11" fill="#ede8df">first-contributions</text>
 <text x="94" y="101" font-family="'DM Mono',monospace" font-size="10" fill="#5a5650">🚀✨ Help beginners to contribute to open source projects</text>
-<text x="778" y="93" font-family="'DM Mono',monospace" font-size="11" fill="#5a5650" text-anchor="end">&#9733; 54.3k</text>
+<text x="778" y="93" font-family="'DM Mono',monospace" font-size="11" fill="#5a5650" text-anchor="end">&#9733; 54.4k</text>
 <rect x="618.0" y="79" width="94.4" height="17" rx="8" fill="rgba(232,160,32,0.07)" stroke="rgba(232,160,32,0.3)" stroke-width="1"/>
 <text x="665" y="92" font-family="'DM Mono',monospace" font-size="9" letter-spacing="1" fill="#e8a020" text-anchor="middle">2 PRs merged</text>
 </a>
@@ -42,7 +42,7 @@
 <text x="94" y="201" font-family="'DM Mono',monospace" font-size="11" fill="#5a5650">Universal-Debloater-Alliance /</text>
 <text x="287.20000000000005" y="201" font-family="'DM Mono',monospace" font-size="11" fill="#ede8df">universal-android-debloater-next-generation</text>
 <text x="94" y="217" font-family="'DM Mono',monospace" font-size="10" fill="#5a5650">Cross-platform GUI written in Rust using ADB to debloat non...</text>
-<text x="778" y="209" font-family="'DM Mono',monospace" font-size="11" fill="#5a5650" text-anchor="end">&#9733; 6.7k</text>
+<text x="778" y="209" font-family="'DM Mono',monospace" font-size="11" fill="#5a5650" text-anchor="end">&#9733; 6.8k</text>
 <circle cx="685.6" cy="205" r="5" fill="#dea584"/>
 <text x="695.6" y="209" font-family="'DM Mono',monospace" font-size="10" fill="#5a5650">Rust</text>
 <rect x="579.4" y="195" width="88.2" height="17" rx="8" fill="rgba(232,160,32,0.07)" stroke="rgba(232,160,32,0.3)" stroke-width="1"/>
@@ -90,7 +90,7 @@
 <text x="94" y="375" font-family="'DM Mono',monospace" font-size="11" fill="#5a5650">jksalcedo /</text>
 <text x="165.6" y="375" font-family="'DM Mono',monospace" font-size="11" fill="#ede8df">librefind</text>
 <text x="94" y="391" font-family="'DM Mono',monospace" font-size="10" fill="#5a5650">Discover and replace proprietary apps with FOSS alternatives</text>
-<text x="778" y="383" font-family="'DM Mono',monospace" font-size="11" fill="#5a5650" text-anchor="end">&#9733; 621</text>
+<text x="778" y="383" font-family="'DM Mono',monospace" font-size="11" fill="#5a5650" text-anchor="end">&#9733; 630</text>
 <circle cx="679.6" cy="379" r="5" fill="#A97BFF"/>
 <text x="689.6" y="383" font-family="'DM Mono',monospace" font-size="10" fill="#5a5650">Kotlin</text>
 <rect x="573.4" y="369" width="88.2" height="17" rx="8" fill="rgba(232,160,32,0.07)" stroke="rgba(232,160,32,0.3)" stroke-width="1"/>
@@ -122,7 +122,7 @@
 <text x="94" y="491" font-family="'DM Mono',monospace" font-size="11" fill="#5a5650">makalin /</text>
 <text x="152.8" y="491" font-family="'DM Mono',monospace" font-size="11" fill="#ede8df">PlaySync</text>
 <text x="94" y="507" font-family="'DM Mono',monospace" font-size="10" fill="#5a5650">PlaySync - Multi-Platform Playlist Tool. A terminal applica...</text>
-<text x="778" y="499" font-family="'DM Mono',monospace" font-size="11" fill="#5a5650" text-anchor="end">&#9733; 22</text>
+<text x="778" y="499" font-family="'DM Mono',monospace" font-size="11" fill="#5a5650" text-anchor="end">&#9733; 23</text>
 <circle cx="686.4" cy="495" r="5" fill="#3572A5"/>
 <text x="696.4" y="499" font-family="'DM Mono',monospace" font-size="10" fill="#5a5650">Python</text>
 <rect x="580.1999999999999" y="485" width="88.2" height="17" rx="8" fill="rgba(232,160,32,0.07)" stroke="rgba(232,160,32,0.3)" stroke-width="1"/>
